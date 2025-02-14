@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotic Arm Control</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .slider-container { margin: 20px; }
+        input[type="range"] { width: 80%; }
+    </style>
+</head>
+<body>
+
+    <h1>Robotic Arm Control</h1>
+
+    <div id="controls">
+        <div class="slider-container">
+            <label>Base Rotation: <span id="base-val">90</span>°</label><br>
+            <input type="range" id="base" min="0" max="180" value="90">
+        </div>
+
+        <div class="slider-container">
+            <label>Shoulder: <span id="shoulder-val">90</span>°</label><br>
+            <input type="range" id="shoulder" min="0" max="180" value="90">
+        </div>
+
+        <div class="slider-container">
+            <label>Elbow: <span id="elbow-val">90</span>°</label><br>
+            <input type="range" id="elbow" min="0" max="180" value="90">
+        </div>
+
+        <div class="slider-container">
+            <label>Wrist: <span id="wrist-val">90</span>°</label><br>
+            <input type="range" id="wrist" min="0" max="180" value="90">
+        </div>
+
+        <div class="slider-container">
+            <label>Gripper Rotation: <span id="gripper-rotation-val">90</span>°</label><br>
+            <input type="range" id="gripper-rotation" min="0" max="180" value="90">
+        </div>
+
+        <div class="slider-container">
+            <label>Gripper: <span id="gripper-val">90</span>°</label><br>
+            <input type="range" id="gripper" min="0" max="180" value="90">
+        </div>
+    </div>
+
+    <script>
+        const serverUrl = "https://robotic-arm.onrender.com"; // Update this with your Flask URL
+
+        document.querySelectorAll("input[type=range]").forEach(slider => {
+            slider.addEventListener("input", (event) => {
+                const servo = event.target.id;
+                const value = event.target.value;
+                document.getElementById(`${servo}-val`).textContent = value;
+
+                fetch(`${serverUrl}/update_servo`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ servo, value })
+                }).catch(err => console.error("Error:", err));
+            });
+        });
+
+        async function fetchServoPositions() {
+            const response = await fetch(`${serverUrl}/get_servo_positions`);
+            const data = await response.json();
+            for (const [servo, value] of Object.entries(data)) {
+                document.getElementById(servo).value = value;
+                document.getElementById(`${servo}-val`).textContent = value;
+            }
+        }
+
+        fetchServoPositions(); // Load current servo positions on page load
+    </script>
+
+</body>
+</html>
